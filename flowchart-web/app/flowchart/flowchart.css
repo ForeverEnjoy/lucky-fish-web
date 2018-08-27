@@ -1,0 +1,12 @@
+.brief-wrapper {
+    border-bottom: 1px solid #eee;
+    box-shadow: 0 0 5px #d3d3d3;
+}
+
+.green-color {
+    color: green;
+}
+
+.w-50-pc {
+    width: 50%;
+}

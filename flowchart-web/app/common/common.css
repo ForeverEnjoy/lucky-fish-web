@@ -1,0 +1,85 @@
+.hover-pointer {
+    cursor: pointer;
+}
+
+.display-none {
+    display: none;
+}
+
+.visibility-hidden {
+    visibility: hidden;
+}
+
+.single-line-overflow-ellipsis {
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.y-scroll-bar-display {
+    overflow-y: scroll;
+}
+
+.y-scroll-bar-display-none {
+    overflow-y: scroll;
+}
+
+.y-scroll-bar-display-none::-webkit-scrollbar {
+    display: none;
+}
+
+.white-bg {
+    background-color: white;
+}
+
+.blue-bg {
+    background-color: blue;
+}
+
+.green-bg {
+    background-color: green;
+}
+
+.red-bg {
+    background-color: red;
+}
+
+.inherit-bg {
+    background-color: inherit;
+}
+
+.img-responsive {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+.font-bold {
+    font-weight: bold;
+}
+
+.font-type-1 {
+    color: #00AA00;
+    font-size: 30px;
+}
+
+.font-type-2 {
+    font-size: 20px;
+    color: #444;
+    font-weight: 300;
+}
+
+.font-type-3 {
+    font-size: 16px;
+    font-weight: normal;
+    font-family: "Open Sans", "arial, helvetica, sans-serif";
+}
+
+.font-thin-1 {
+    font-weight: 400;
+}
+
+.font-size-px-24 {
+    font-size: 24px;
+}

@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "module": "system",
+        "outDir": "dist",
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "removeComments": false,
+        "noImplicitAny": false
+    },
+    "filesGlob": [
+        "app/**/*.ts",
+        "typings/*.d.ts"
+    ],
+    "local_css": [
+        "app/common/common.aligner.css",
+        "app/common/common.sizer.css",
+        "app/common/common.css"
+    ],
+    "local_libs": [
+        "systemjs.config.js"
+    ]
+}

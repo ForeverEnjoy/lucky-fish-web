@@ -1,0 +1,15 @@
+.comp-wrapper-aligner {
+    padding-right: 20px;
+    padding-left: 20px;
+}
+
+.search-icon-aligner {
+    margin-left: -29px;
+    margin-top: 4px;
+}
+
+.form-input-aligner {
+    display: block;
+    padding: 6px 12px;
+    line-height: 1.42857143;
+}
