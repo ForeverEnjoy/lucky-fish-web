@@ -54,20 +54,17 @@ export class Graph {
     }
 
     // 分层 并 插入虚拟结点
-    public level: number[][] = [];
+    public levels: number[][] = [];
     public assignLayers(): number[][] {
-        const sorted = [];
+        this.levels = [];
 
         let inMap = new Map<number, number>();
+        this.vertices.forEach(v => {
+            inMap.set(v, 0);
+        })
+
         this.edges.forEach(e => {
-            if (inMap.has(e.to)) {
-                inMap.set(e.to, inMap.get(e.to) + 1)
-            } else {
-                inMap.set(e.to, 1);
-            }
-            if (!inMap.has(e.from)) {
-                inMap.set(e.from, 0);
-            }
+            inMap.set(e.to, inMap.get(e.to) + 1)
         });
 
         while(true) {
@@ -91,28 +88,33 @@ export class Graph {
             arr.forEach(v => {
                 inMap.delete(v);
             })
-            sorted.push(arr);
+            this.levels.push(arr);
         }
 
 
         // console.log(JSON.parse(JSON.stringify(sorted)));
-        for (let i = 0; i < sorted.length - 1; ++i) {
-            for (let j = 0; j < sorted[i].length; ++j) {
-                let u = sorted[i][j];
+        // insert dummy vertex
+        this.insertDummyVertexes();
+
+        return this.levels;
+    }
+
+    public insertDummyVertexes() {
+        for (let i = 0; i < this.levels.length - 1; ++i) {
+            for (let j = 0; j < this.levels[i].length; ++j) {
+                let u = this.levels[i][j];
                 let outEdges = this.getOutEdges(u);
                 outEdges.forEach(e => {
-                    if (sorted[i + 1].findIndex(v => e.to == v) < 0) {
+                    if (this.levels[i + 1].findIndex(v => e.to == v) < 0) {
                         let dummyVertex = DummyVertex.Create();
                         let newEdge = new Edge(dummyVertex, e.to);
                         e.to = dummyVertex;
                         this.addEdge(newEdge);
-                        sorted[i+1].push(dummyVertex);
+                        this.levels[i+1].push(dummyVertex);
                     }
                 });
             }
         }
-
-        return sorted;
     }
 }
 
@@ -195,7 +197,7 @@ export class VertexOrderer {
         }
 
         for (let i = this._layers.length - 1; i >= 0; --i) {
-            this._layers[i].sort((a, b) => a.outWeight/(a.outNodes.length+1.0)- b.outWeight/(b.outNodes.length+1.0));
+            this._layers[i].sort((a, b) => a.outWeight/(a.outNodes.length+1.0) - b.outWeight/(b.outNodes.length+1.0));
             if (i < 1) {
                 break;
             }
@@ -230,7 +232,6 @@ export class Node {
     public width: number = 50;
     public height: number = 50;
     public id: number;
-    public type: number = 0;
     public out: number[] = [];
     public inWeight: number = 0;
     public outWeight: number = 0;

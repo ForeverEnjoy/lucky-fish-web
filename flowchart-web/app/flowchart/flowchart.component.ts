@@ -40,6 +40,18 @@ import { DummyVertex } from './dummy-vertex';
                 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="height: 1000px; width: 90%">
                     <g *ngFor="let chart of charts;let rowIndex=index">
                         <g *ngFor="let v of chart; let columnIndex=index">
+                            <g *ngIf="rowIndex < charts.length - 1">
+                                <g *ngFor="let edge of graph.getOutEdges(v.id)">
+                                    <g *ngIf="edge.type == -1">
+                                        <line [attr.x1]="v.x + v.width / 2"
+                                              [attr.y1]="v.y + v.height / 2"
+                                              [attr.x2]="vertexNodeMap.get(edge.to).x + v.width / 2"
+                                              [attr.y2]="vertexNodeMap.get(edge.to).y + v.height / 2"
+                                              style="stroke:rgb(99,99,99);stroke-width:2"/>
+                                    </g>
+                                </g>
+                            </g>
+                            
                             <g *ngIf="isDummyVertex(v.id)">
                                 <!--<line [attr.x1]="v.x + v.width / 2" [attr.y1]="v.y"-->
                                       <!--[attr.x2]="v.x + v.width / 2" [attr.y2]="v.y + v.height"-->
@@ -69,23 +81,6 @@ import { DummyVertex } from './dummy-vertex';
                                       font-family="Open Sans, Noto Sans SC, Noto Sans TC, Noto Sans JP, Noto Sans KR" 
                                       font-size="10.00" fill="white">{{v.id}}</text>
                             </g>
-                            <!--<g *ngIf="rowIndex < charts.length - 1">-->
-                                <!--<g *ngFor="let nextNode of v.outNodes">-->
-                                    <!--<line [attr.x1]="v.x + v.width / 2" [attr.y1]="v.y + v.height"-->
-                                          <!--[attr.x2]="nextNode.x + v.width / 2" [attr.y2]="nextNode.y"-->
-                                          <!--style="stroke:rgb(99,99,99);stroke-width:2"/>-->
-                                <!--</g>-->
-                            <!--</g>-->
-                            <g *ngIf="rowIndex < charts.length - 1">
-                                <g *ngFor="let edge of graph.getOutEdges(v.id)">
-                                    <g *ngIf="edge.type == -1">
-                                        <line [attr.x1]="v.x + v.width / 2" [attr.y1]="v.y + v.height"
-                                              [attr.x2]="vertexNodeMap.get(edge.to).x + v.width / 2" 
-                                              [attr.y2]="vertexNodeMap.get(edge.to).y"
-                                              style="stroke:rgb(99,99,99);stroke-width:2"/>
-                                    </g>
-                                </g>
-                            </g>
                         </g>
                     </g>
                 </svg>
@@ -105,6 +100,7 @@ export class FlowchartComponent implements OnInit {
     public graph: Graph;
     public vertexNodeMap: Map<number, Node> = new Map<number, Node>();
     public vertexPosMap: Map<number, number> = new Map<number, number>();
+    public pred: Map<number, number> = new Map<number, number>();
 
     public ngOnInit() {
        let g = new Graph(DataEdges);
@@ -123,14 +119,21 @@ export class FlowchartComponent implements OnInit {
                arr.push(node.id);
                this.vertexNodeMap.set(node.id, node);
                this.vertexPosMap.set(node.id, j);
+               if (j > 0) {
+                   this.pred.set(node.id, ov[i][j-1].id);
+               }
            }
            this.layers.push(arr);
        }
        console.log(this.layers);
 
-       this.preprocessingType0();
+       // this.preprocessingType0();
        this.preprocessingType1();
        console.log(this.graph.edges);
+       this.verticalAlignment();
+       console.log('root', this.root);
+       console.log('align', this.align);
+       this.horizontalCompaction();
 
        let sumy = 0;
        for (let i = 0; i < ov.length; ++i) {
@@ -197,41 +200,97 @@ export class FlowchartComponent implements OnInit {
         }
     }
 
-    public preprocessingType0() {
-        for (let i = 0;  i < this.layers.length; ++i) {
-            for (let j = 0; j < this.layers[i].length; ++j) {
-                if (i > 0) {
-                    let edges = this.graph.getInEdges(this.layers[i][j]);
-                    if (edges.length > 2) {
-                        edges.sort((a, b) => this.vertexPosMap.get(a.from) - this.vertexPosMap.get(b.from));
-                        for (let k = 0; k < edges.length; ++k) {
-                            if (k != Math.floor((edges.length - 1) / 2) && k != Math.floor(edges.length / 2)) {
-                                edges[k].type = 0;
-                            }
+    public root = new Map<number, number>();
+    public align = new Map<number, number>();
+    public verticalAlignment() {
+        this.graph.vertices.forEach(v => {
+            this.root.set(v, v);
+            this.align.set(v, v);
+        });
+
+        for (let i = 0; i < this.layers.length; ++i) {
+            let r = -1;
+            for (let k = 0; k < this.layers[i].length; ++k) {
+                let v = this.layers[i][k];
+                let edges = this.graph.getInEdges(v);
+                if (edges.length == 0) {
+                    continue;
+                }
+
+                edges.sort((a, b) => this.vertexPosMap.get(a.from) - this.vertexPosMap.get(b.from));
+
+                let mArr = [Math.floor(edges.length / 2)];
+                if (edges.length % 2 === 0) {
+                    mArr.push(Math.floor((edges.length - 1) / 2));
+                }
+
+                mArr.forEach(m => {
+                    if (this.align.get(v) == v) {
+                        let u = edges[m].from;
+                        console.log('---------', r, u, v, edges[m]);
+                        if (edges[m].type == -1 && r < this.vertexPosMap.get(edges[m].from)) {
+                            this.align.set(u, v);
+                            this.root.set(v, this.root.get(u));
+                            this.align.set(v, this.root.get(v));
+                            r = this.vertexPosMap.get(u);
                         }
                     }
-                }
-                if (i < this.layers.length - 1) {
-                    let edges = this.graph.getOutEdges(this.layers[i][j]);
-                    if (edges.length > 2) {
-                        edges.sort((a, b) => this.vertexPosMap.get(a.to) - this.vertexPosMap.get(b.to));
-                        for (let k = 0; k < edges.length; ++k) {
-                            if (k != Math.floor((edges.length - 1) / 2) && k != Math.floor(edges.length / 2)) {
-                                edges[k].type = 0;
-                            }
-                        }
-                    }
-                }
+                });
             }
         }
     }
 
-    public preprocessingType2() {
+    public x: Map<number, number> = new Map<number, number>();
+    public readonly delt = 30;
+    public placeBlock(v: number) {
+        if (this.x.has(v))  {
+            return ;
+        }
+
+        this.x.set(v, 0);
+        let w = v;
+        do {
+            if (this.vertexPosMap.get(w) > 0) {
+                let u = this.root.get(this.pred.get(w));
+                this.placeBlock(v);
+                if (this.sink.get(v) == v) {
+                    this.sink.set(v, this.sink.get(u));
+                }
+                if (this.sink.get(v) != this.sink.get(u)) {
+                    let tmp = Math.min(this.shift.get(this.sink.get(u)), this.x.get(v) - this.x.get(u) - this.delt);
+                    this.shift.set(this.sink.get(u), tmp);
+                } else {
+                    let tmp = Math.max(this.x.get(v), this.x.get(u) + this.delt);
+                    this.x.set(v, tmp);
+                }
+            }
+            w = this.align[w];
+        } while (w == v);
     }
 
-    public root = new Map<number, number>();
-    public align = new Map<number, number>();
-    VerticalAlignment() {
+    public sink = new Map<number, number>();
+    public shift = new Map<number, number>();
+    public readonly INF = 1000000000;
+    public horizontalCompaction() {
+        this.graph.vertices.forEach(v => {
+            this.sink.set(v, v);
+            this.shift.set(v, this.INF);
+        });
+
+        this.graph.vertices.forEach(v => {
+            if (this.root.get(v) == v) {
+                this.placeBlock(v);
+            }
+        });
+
+        this.graph.vertices.forEach(v => {
+            this.x.set(v, this.x.get(this.root.get(v)));
+            let ssrv = this.shift.get(this.sink.get(this.root.get(v)));
+            if (ssrv < this.INF) {
+                this.x.set(v, this.x.get(v) + ssrv);
+            }
+        });
+        console.log('horizontalCompaction', this.x);
     }
 }
 
