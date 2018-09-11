@@ -18,7 +18,7 @@ import { DummyVertex } from './dummy-vertex';
                             v-center-aligner
                             brief-wrapper-h">
                     <div class="font-type-2"> 
-                        傻鱼娜的流程图
+                        <!--傻鱼娜的流程图-->
                     </div>
                 </div>
             </div>
@@ -27,46 +27,73 @@ import { DummyVertex } from './dummy-vertex';
                         flex-column-aligner">
                 <div *ngFor="let layer of layers; let index=index"
                      class="flex-row-aligner">
-                    <div class="green-color">{{index}} &nbsp;:&nbsp; </div>
+                    <div class="green-color">
+                        {{index}} &nbsp;:&nbsp; 
+                    </div>
                     <div class="flex-row-aligner"
                          *ngFor="let vertex of layer">
-                        <div> {{vertex}} &nbsp;&nbsp;</div>
+                        <div> 
+                            {{vertex}} &nbsp;&nbsp;
+                        </div>
                     </div>
                 </div> 
             </div>
+            
             <div class="flex-column-aligner
                         h-center-aligner
                         percent-100-w">
-                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="height: 1000px; width: 90%">
+                <svg style="height: 1000px; width: 90%">
+
+                    <defs> 
+                        <marker id="arrow" refX="6" refY="3"
+                                markerWidth="6" markerHeight="6"
+                                orient="auto-start-reverse">
+                            <path d="M 0 0 L 6 3 L 0 6 z" />
+                        </marker>
+                    </defs>
                     <g *ngFor="let chart of charts;let rowIndex=index">
                         <g *ngFor="let v of chart; let columnIndex=index">
                             <g *ngIf="rowIndex < charts.length - 1">
                                 <g *ngFor="let edge of graph.getOutEdges(v.id)">
-                                    <g *ngIf="edge.type == -1">
+                                    <!--<g *ngIf="edge.type == -1">-->
+                                    <g *ngIf="!isDummyVertex(edge.to)">
                                         <line [attr.x1]="v.x + v.width / 2"
                                               [attr.y1]="v.y + v.height / 2"
                                               [attr.x2]="vertexNodeMap.get(edge.to).x + v.width / 2"
                                               [attr.y2]="vertexNodeMap.get(edge.to).y + v.height / 2"
-                                              style="stroke:rgb(99,99,99);stroke-width:2"/>
+                                              [style.stroke]="'rgb(99,99,99)'"
+                                              [style.stroke-width]="2"
+                                              marker-end="url(#arrow)"/>
                                     </g>
+                                    <g *ngIf="isDummyVertex(edge.to)">
+                                        <line [attr.x1]="v.x + v.width / 2"
+                                              [attr.y1]="v.y + v.height / 2"
+                                              [attr.x2]="vertexNodeMap.get(edge.to).x + v.width / 2"
+                                              [attr.y2]="vertexNodeMap.get(edge.to).y + v.height / 2"
+                                              [style.stroke]="'rgb(99,99,99)'"
+                                              [style.stroke-width]="2"/>
+                                    </g>
+                                    <!--</g>-->
                                 </g>
                             </g>
                             
                             <g *ngIf="isDummyVertex(v.id)">
-                                <!--<line [attr.x1]="v.x + v.width / 2" [attr.y1]="v.y"-->
-                                      <!--[attr.x2]="v.x + v.width / 2" [attr.y2]="v.y + v.height"-->
-                                      <!--style="stroke:rgb(99,99,99);stroke-width:2"/>-->
-                                <rect [attr.x]="v.x" 
-                                      [attr.y]="v.y" 
-                                      [attr.width]="v.width" 
-                                      [attr.height]="v.height"
-                                      style="stroke-width:1;stroke:white"/>
-                                <text text-anchor="start" 
-                                      [attr.x]="v.x + 10" 
-                                      [attr.y]="v.y + 20" 
-                                      font-family="Open Sans, Noto Sans SC, Noto Sans TC, Noto Sans JP, Noto Sans KR"
-                                      font-size="10.00" 
-                                      fill="white">{{v.id}}</text>
+                                <line [attr.x1]="v.x + v.width / 2"
+                                      [attr.y1]="v.y + v.height / 2"
+                                      [attr.x2]="v.x + v.width / 2"
+                                      [attr.y2]="v.y + v.height / 2"
+                                      [style.stroke]="'rgb(99,99,99)'"
+                                      [style.stroke-width]="3"/>
+                                <!--<rect [attr.x]="v.x" -->
+                                      <!--[attr.y]="v.y" -->
+                                      <!--[attr.width]="v.width" -->
+                                      <!--[attr.height]="v.height"-->
+                                      <!--style="stroke-width:1;stroke:white"/>-->
+                                <!--<text text-anchor="start" -->
+                                      <!--[attr.x]="v.x + 5" -->
+                                      <!--[attr.y]="v.y + 13" -->
+                                      <!--font-size="10.00" -->
+                                      <!--fill="white">{{v.id}}</text>-->
                             </g>
 
                             <g *ngIf="!isDummyVertex(v.id)">
@@ -74,12 +101,16 @@ import { DummyVertex } from './dummy-vertex';
                                       [attr.y]="v.y" 
                                       [attr.width]="v.width" 
                                       [attr.height]="v.height"
-                                      style="fill:blue;stroke-width:1;stroke:rgb(0,0,0)"/>
+                                      [style.fill]="'rgb(255, 255, 255)'"
+                                      [style.stroke-width]="1"
+                                      [style.stroke]="'rgb(0, 0, 0)'"/>
                                 <text text-anchor="start" 
-                                      [attr.x]="v.x + 10" 
-                                      [attr.y]="v.y + 20" 
-                                      font-family="Open Sans, Noto Sans SC, Noto Sans TC, Noto Sans JP, Noto Sans KR" 
-                                      font-size="10.00" fill="white">{{v.id}}</text>
+                                      [attr.x]="v.x + 5" 
+                                      [attr.y]="v.y + 13" 
+                                      font-size="10.00" 
+                                      fill="black">
+                                    {{v.id}}
+                                </text>
                             </g>
                         </g>
                     </g>
@@ -125,9 +156,10 @@ export class FlowchartComponent implements OnInit {
            }
            this.layers.push(arr);
        }
-       console.log(this.layers);
+       console.log('layers', this.layers);
+       console.log('pred', this.pred);
 
-       // this.preprocessingType0();
+       this.preprocessingType0();
        this.preprocessingType1();
        console.log(this.graph.edges);
        this.verticalAlignment();
@@ -140,13 +172,14 @@ export class FlowchartComponent implements OnInit {
            let sumx = 0;
            for (let j = 0; j < ov[i].length; ++j)  {
                let node = ov[i][j];
-               node.x = sumx;
+               // node.x = sumx;
+               node.x = this.x.get(node.id);
                node.y = sumy;
-               node.width = 35;
-               node.height = 25;
-               sumx += 35 + 50;
+               node.width = 30;
+               node.height = 20;
+               sumx += 30 + 50;
            }
-           sumy += 25 + 50;
+           sumy += 20 + 50;
        }
        this.charts = ov;
        // console.log('layerAssignment ', result);
@@ -240,9 +273,40 @@ export class FlowchartComponent implements OnInit {
         }
     }
 
+    public preprocessingType0() {
+        for (let i = 0;  i < this.layers.length; ++i) {
+            for (let j = 0; j < this.layers[i].length; ++j) {
+                if (i > 0) {
+                    let edges = this.graph.getInEdges(this.layers[i][j]);
+                    if (edges.length > 2) {
+                        edges.sort((a, b) => this.vertexPosMap.get(a.from) - this.vertexPosMap.get(b.from));
+                        for (let k = 0; k < edges.length; ++k) {
+                            if (k != Math.floor((edges.length - 1) / 2) && k != Math.floor(edges.length / 2)) {
+                                edges[k].type = 0;
+                            }
+                        }
+                    }
+                }
+                if (i < this.layers.length - 1) {
+                    let edges = this.graph.getOutEdges(this.layers[i][j]);
+                    if (edges.length > 2) {
+                        edges.sort((a, b) => this.vertexPosMap.get(a.to) - this.vertexPosMap.get(b.to));
+                        for (let k = 0; k < edges.length; ++k) {
+                            if (k != Math.floor((edges.length - 1) / 2) && k != Math.floor(edges.length / 2)) {
+                                edges[k].type = 0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
     public x: Map<number, number> = new Map<number, number>();
-    public readonly delt = 30;
+    public readonly delt = 30 + 50;
     public placeBlock(v: number) {
+        // console.log('placeBlock ', v, this.x.has(v));
         if (this.x.has(v))  {
             return ;
         }
@@ -250,9 +314,11 @@ export class FlowchartComponent implements OnInit {
         this.x.set(v, 0);
         let w = v;
         do {
+            // console.log("w ", w);
+
             if (this.vertexPosMap.get(w) > 0) {
                 let u = this.root.get(this.pred.get(w));
-                this.placeBlock(v);
+                this.placeBlock(u);
                 if (this.sink.get(v) == v) {
                     this.sink.set(v, this.sink.get(u));
                 }
@@ -260,17 +326,19 @@ export class FlowchartComponent implements OnInit {
                     let tmp = Math.min(this.shift.get(this.sink.get(u)), this.x.get(v) - this.x.get(u) - this.delt);
                     this.shift.set(this.sink.get(u), tmp);
                 } else {
+                    // console.log('before placeBlock set x tmp ', v, this.x.get(v), u, this.x.get(u), w);
                     let tmp = Math.max(this.x.get(v), this.x.get(u) + this.delt);
                     this.x.set(v, tmp);
+                    // console.log('after placeBlock set x tmp ', v, this.x.get(v));
                 }
             }
-            w = this.align[w];
-        } while (w == v);
+            w = this.align.get(w);
+        } while (w != v);
     }
 
     public sink = new Map<number, number>();
     public shift = new Map<number, number>();
-    public readonly INF = 1000000000;
+    public readonly INF: number = 10000000;
     public horizontalCompaction() {
         this.graph.vertices.forEach(v => {
             this.sink.set(v, v);
@@ -288,9 +356,10 @@ export class FlowchartComponent implements OnInit {
             let ssrv = this.shift.get(this.sink.get(this.root.get(v)));
             if (ssrv < this.INF) {
                 this.x.set(v, this.x.get(v) + ssrv);
+                // console.log('horizontalCompaction set x ', v, this.x.get(v));
             }
         });
-        console.log('horizontalCompaction', this.x);
+        console.log('horizontalCompaction x', this.x);
     }
 }
 
