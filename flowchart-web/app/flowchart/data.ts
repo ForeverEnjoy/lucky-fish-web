@@ -36,21 +36,21 @@ import { Edge } from './graph-entity';
 // ];
 
 var DataEdges = [
-    new Edge(1, 2),
-    new Edge(1, 3),
-    new Edge(1, 8),
-    new Edge(2, 4),
-    new Edge(2, 8),
-    new Edge(3, 4),
-    new Edge(3, 5),
-    new Edge(3, 6),
-    new Edge(3, 10),
-    new Edge(4, 8),
-    new Edge(5, 8),
-    new Edge(6, 7),
-    new Edge(7, 9),
-    new Edge(8, 9),
-    new Edge(8, 10),
+    new Edge('1', '2'),
+    new Edge('1', '3'),
+    new Edge('1', '8'),
+    new Edge('2', '4'),
+    new Edge('2', '8'),
+    new Edge('3', '4'),
+    new Edge('3', '5'),
+    new Edge('3', '6'),
+    new Edge('3', '10'),
+    new Edge('4', '8'),
+    new Edge('5', '8'),
+    new Edge('6', '7'),
+    new Edge('7', '9'),
+    new Edge('8', '9'),
+    new Edge('8', '10'),
 ];
 
 export {DataEdges};

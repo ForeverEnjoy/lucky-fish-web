@@ -24,22 +24,6 @@ import { FlowChartManager } from 'app/flowchart/flowchart-manager';
                 </div>
             </div>
             
-            <div class="w-50-pc
-                        flex-column-aligner">
-                <div *ngFor="let layer of layers; let index=index"
-                     class="flex-row-aligner">
-                    <div class="green-color">
-                        {{index}} &nbsp;:&nbsp; 
-                    </div>
-                    <div class="flex-row-aligner"
-                         *ngFor="let vertex of layer">
-                        <div> 
-                            {{vertex}} &nbsp;&nbsp;
-                        </div>
-                    </div>
-                </div> 
-            </div>
-            
             <div class="flex-column-aligner
                         h-center-aligner
                         percent-100-w">
@@ -130,9 +114,9 @@ export class FlowchartComponent implements OnInit {
     public layers = [];
     public charts = [];
     public graph: Graph;
-    public vertexNodeMap: Map<number, Node> = new Map<number, Node>();
-    public vertexPosMap: Map<number, number> = new Map<number, number>();
-    public pred: Map<number, number> = new Map<number, number>();
+    public vertexNodeMap: Map<string, Node> = new Map<string, Node>();
+    public vertexPosMap: Map<string, number> = new Map<string, number>();
+    public pred: Map<string, string> = new Map<string, string>();
 
     public ngOnInit() {
        let g = new Graph(DataEdges);
@@ -196,7 +180,7 @@ export class FlowchartComponent implements OnInit {
             let k0 = -1, l = 0;
             for (let l1 = 0; l1 < this.layers[i+1].length; ++l1) {
                 let isInnerSegment = false;
-                let upperNeighbor = 0;
+                let upperNeighbor = '0';
                 if (l1 != this.layers[i + 1].length - 1) {
                     let edges = this.graph.getInEdges(this.layers[i+1][l1]);
                     edges.forEach(e => {
@@ -235,10 +219,10 @@ export class FlowchartComponent implements OnInit {
         }
     }
 
-    public root = new Map<number, number>();
-    public align = new Map<number, number>();
+    public root = new Map<string, string>();
+    public align = new Map<string, string>();
     public verticalAlignment() {
-        this.graph.vertices.forEach(v => {
+        this.graph.vertexIdSet.forEach(v => {
             this.root.set(v, v);
             this.align.set(v, v);
         });
@@ -305,9 +289,9 @@ export class FlowchartComponent implements OnInit {
     }
 
 
-    public x: Map<number, number> = new Map<number, number>();
+    public x: Map<string, number> = new Map<string, number>();
     public readonly delt = 30 + 50;
-    public placeBlock(v: number) {
+    public placeBlock(v: string) {
         // console.log('placeBlock ', v, this.x.has(v));
         if (this.x.has(v))  {
             return ;
@@ -338,22 +322,22 @@ export class FlowchartComponent implements OnInit {
         } while (w != v);
     }
 
-    public sink = new Map<number, number>();
-    public shift = new Map<number, number>();
+    public sink = new Map<string, string>();
+    public shift = new Map<string, number>();
     public readonly INF: number = 10000000;
     public horizontalCompaction() {
-        this.graph.vertices.forEach(v => {
+        this.graph.vertexIdSet.forEach(v => {
             this.sink.set(v, v);
             this.shift.set(v, this.INF);
         });
 
-        this.graph.vertices.forEach(v => {
+        this.graph.vertexIdSet.forEach(v => {
             if (this.root.get(v) == v) {
                 this.placeBlock(v);
             }
         });
 
-        this.graph.vertices.forEach(v => {
+        this.graph.vertexIdSet.forEach(v => {
             this.x.set(v, this.x.get(this.root.get(v)));
             let ssrv = this.shift.get(this.sink.get(this.root.get(v)));
             if (ssrv < this.INF) {

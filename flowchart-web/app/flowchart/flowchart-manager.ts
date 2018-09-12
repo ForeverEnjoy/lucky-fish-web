@@ -10,17 +10,17 @@ export class FlowChartManager {
     }
 
     // ---------------------------------- remove cycles ----------------------------------
-    private _stack: Set<number> = new Set<number>();
-    private _visited: Set<number> = new Set<number>();
+    private _stack: Set<string> = new Set<string>();
+    private _visited: Set<string> = new Set<string>();
     public removeCycles() {
         this._visited.clear();
         this._stack.clear();
-        this.graph.vertices.forEach(vertex => {
+        this.graph.vertexIdSet.forEach(vertex => {
             this.dfsRemove(vertex);
         });
     }
 
-    private dfsRemove(vertex: number) {
+    private dfsRemove(vertex: string) {
         if (this._visited.has(vertex)) {
             return
         }
@@ -37,12 +37,12 @@ export class FlowChartManager {
     }
 
     // 分层 并 插入虚拟结点
-    public levels: number[][] = [];
-    public assignLayers(): number[][] {
+    public levels: string[][] = [];
+    public assignLayers(): string[][] {
         this.levels = [];
 
-        let inMap = new Map<number, number>();
-        this.graph.vertices.forEach(v => {
+        let inMap = new Map<string, number>();
+        this.graph.vertexIdSet.forEach(v => {
             inMap.set(v, 0);
         })
 

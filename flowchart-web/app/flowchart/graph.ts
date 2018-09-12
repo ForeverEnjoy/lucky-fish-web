@@ -1,30 +1,31 @@
 import { DummyVertex } from './dummy-vertex';
-import { Edge } from './graph-entity';
+import { Edge, Vertex } from './graph-entity';
 
 export class Graph {
     public edges: Edge[];
-    public vertices: Set<number> = new Set<number>();
+    public vertexIdSet: Set<string> = new Set<string>();
+    // public vertexes: Vertex[] = [];
 
     constructor(edges: Edge[]) {
         this.edges = edges
         for (let edge of edges) {
-            this.vertices.add(edge.from)
-            this.vertices.add(edge.to)
+            this.vertexIdSet.add(edge.from)
+            this.vertexIdSet.add(edge.to)
         }
     }
 
-    public getOutEdges(vertex: number): Edge[] {
+    public getOutEdges(vertex: string): Edge[] {
         return this.edges.filter(e => e.from === vertex);
     }
 
-    public getInEdges(vertex: number): Edge[] {
+    public getInEdges(vertex: string): Edge[] {
         return this.edges.filter(e => e.to === vertex);
     }
 
     public addEdge(edge: Edge) {
         this.edges.push(edge);
-        this.vertices.add(edge.from)
-        this.vertices.add(edge.to)
+        this.vertexIdSet.add(edge.from)
+        this.vertexIdSet.add(edge.to)
     }
 }
 
@@ -33,7 +34,7 @@ export class VertexOrderer {
     private _graph: Graph;
     private _layers: Node[][] = [];
     private virtualNow = 1000;
-    constructor(graph: Graph, numLayers: number[][]) {
+    constructor(graph: Graph, numLayers: string[][]) {
         this._graph = graph;
         this._layers = [];
         numLayers.forEach(numLayer => {
@@ -91,20 +92,7 @@ export class VertexOrderer {
                 }
             }
         }
-        this.show();
         return this._layers;
-    }
-
-    public show() {
-        for (let i = 0; i < this._layers.length; ++i) {
-            console.log(this._layers[i]);
-            let row = [];
-            for (let j = 0; j < this._layers[i].length; ++j) {
-                let node = this._layers[i][j];
-                row.push(node.id);
-            }
-            // console.log('row  ', i + 1, '   : ', row);
-        }
     }
 }
 
@@ -113,8 +101,8 @@ export class Node {
     public y: number;
     public width: number = 50;
     public height: number = 50;
-    public id: number;
-    public out: number[] = [];
+    public id: string;
+    public out: string[] = [];
     public inWeight: number = 0;
     public outWeight: number = 0;
     public outNodes: Node[] = [];

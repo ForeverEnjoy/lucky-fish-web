@@ -4,36 +4,37 @@ export enum VertexType {
 }
 
 export class Vertex {
-    public index: number;
     public id: string;
     public type: VertexType;
     public text: string;
 }
 
 export enum EdgeType {
-    Normal = 1,
-    InnerSegment = 2,
+    Normal = -1,
+    Type0 = 0,
+    Type1 = 1,
+    Type2 = 2,
 }
 
 export class Edge {
-    public from: number;
-    public to: number;
-    public label: string;
-    public type: number;
+    public from: string;
+    public to: string;
+    public text: string;
+    public type: EdgeType;
     public isReversed: boolean;
 
-    constructor(from: number, to: number) {
+    constructor(from: string, to: string) {
         this.from = from;
         this.to = to;
-        this.label = null;
-        this.type = -1;
+        this.text = null;
+        this.type = EdgeType.Normal;
         this.isReversed = false;
     }
 
     public equals(other: Edge): boolean {
         return this.from === other.from
             && this.to === other.to
-            && this.label === other.label;
+            && this.text === other.text;
     }
 
     public reverse() {
