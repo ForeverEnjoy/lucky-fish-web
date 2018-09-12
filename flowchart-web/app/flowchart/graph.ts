@@ -1,4 +1,5 @@
 import { DummyVertex } from './dummy-vertex';
+import { Edge } from './graph-entity';
 
 export class Graph {
     public edges: Edge[];
@@ -25,127 +26,8 @@ export class Graph {
         this.vertices.add(edge.from)
         this.vertices.add(edge.to)
     }
-
-    // ---------------------------------- remove cycles ----------------------------------
-    private _stack: Set<number> = new Set<number>();
-    private _visited: Set<number> = new Set<number>();
-    public removeCycles() {
-        this._visited.clear();
-        this._stack.clear();
-        this.vertices.forEach(vertex => {
-            this.dfsRemove(vertex);
-        });
-    }
-
-    private dfsRemove(vertex: number) {
-        if (this._visited.has(vertex)) {
-            return
-        }
-        this._visited.add(vertex)
-        this._stack.add(vertex)
-        for (let edge of this.getOutEdges(vertex)) {
-            if (this._stack.has(edge.to)) {
-                edge.reverse();
-            } else {
-                this.dfsRemove(edge.to)
-            }
-        }
-        this._stack.delete(vertex);
-    }
-
-    // 分层 并 插入虚拟结点
-    public levels: number[][] = [];
-    public assignLayers(): number[][] {
-        this.levels = [];
-
-        let inMap = new Map<number, number>();
-        this.vertices.forEach(v => {
-            inMap.set(v, 0);
-        })
-
-        this.edges.forEach(e => {
-            inMap.set(e.to, inMap.get(e.to) + 1)
-        });
-
-        while(true) {
-            let arr = [];
-            inMap.forEach((value, key) => {
-                if (value == 0)  {
-                    arr.push(key);
-                }
-            });
-
-            if (arr.length == 0) {
-                break;
-            }
-
-            this.edges.forEach(e => {
-                if (arr.findIndex(v => e.from === v) >= 0) {
-                    inMap.set(e.to, inMap.get(e.to) - 1);
-                }
-            });
-
-            arr.forEach(v => {
-                inMap.delete(v);
-            })
-            this.levels.push(arr);
-        }
-
-
-        // console.log(JSON.parse(JSON.stringify(sorted)));
-        // insert dummy vertex
-        this.insertDummyVertexes();
-
-        return this.levels;
-    }
-
-    public insertDummyVertexes() {
-        for (let i = 0; i < this.levels.length - 1; ++i) {
-            for (let j = 0; j < this.levels[i].length; ++j) {
-                let u = this.levels[i][j];
-                let outEdges = this.getOutEdges(u);
-                outEdges.forEach(e => {
-                    if (this.levels[i + 1].findIndex(v => e.to == v) < 0) {
-                        let dummyVertex = DummyVertex.Create();
-                        let newEdge = new Edge(dummyVertex, e.to);
-                        e.to = dummyVertex;
-                        this.addEdge(newEdge);
-                        this.levels[i+1].push(dummyVertex);
-                    }
-                });
-            }
-        }
-    }
 }
 
-export class Edge {
-    public from: number;
-    public to: number;
-    public label: string;
-    public type: number;
-    public isReversed: boolean;
-
-    constructor(from: number, to: number) {
-        this.from = from;
-        this.to = to;
-        this.label = null;
-        this.type = -1;
-        this.isReversed = false;
-    }
-
-    public equals(other: Edge): boolean {
-        return this.from === other.from
-            && this.to === other.to
-            && this.label === other.label;
-    }
-
-    public reverse() {
-        let from = this.from; //swap arrow
-        this.from= this.to;
-        this.to = from;
-        this.isReversed = !this.isReversed;
-    }
-}
 
 export class VertexOrderer {
     private _graph: Graph;

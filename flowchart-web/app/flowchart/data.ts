@@ -1,4 +1,4 @@
-import { Edge } from './graph';
+import { Edge } from './graph-entity';
 
 // var DataEdges = [
 //     new Edge(1, 3),

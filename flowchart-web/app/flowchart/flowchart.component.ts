@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { DataEdges } from './data';
 import { Graph, VertexOrderer, Node } from './graph';
 import { DummyVertex } from './dummy-vertex';
+import { FlowChartManager } from 'app/flowchart/flowchart-manager';
 
 @Component({
     selector: 'flowchart',
@@ -136,8 +137,9 @@ export class FlowchartComponent implements OnInit {
     public ngOnInit() {
        let g = new Graph(DataEdges);
        this.graph = g;
-       g.removeCycles();
-       this.layers = g.assignLayers();
+       let flowchartManager = new FlowChartManager(g);
+       flowchartManager.removeCycles();
+       this.layers = flowchartManager.assignLayers();
 
        let order = new VertexOrderer(g, this.layers);
        let ov = order.orderVertexes();
