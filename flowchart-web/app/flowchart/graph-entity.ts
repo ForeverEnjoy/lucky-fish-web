@@ -3,8 +3,10 @@ export enum VertexType {
     Dummy = 2
 }
 
+export type VertexIdType = string;
+
 export class Vertex {
-    public id: string;
+    public id: VertexIdType;
     public type: VertexType;
     public text: string;
 }
