@@ -1,11 +1,12 @@
 export class DummyVertex {
-    private static readonly dummyVertexBegin = 1000;
-    private static nowDummyVertex = DummyVertex.dummyVertexBegin;
-    public static Create(): number {
-        return DummyVertex.nowDummyVertex++;
+    // private static readonly prefix = '_dummy_vertex_';
+    private static readonly prefix = '_d_';
+    private static nowDummyVertex = 1;
+    public static Create(): string {
+        return this.prefix + (DummyVertex.nowDummyVertex++);
     }
 
-    public static isDummyVertex(vertex: number): boolean {
-        return vertex >= DummyVertex.dummyVertexBegin;
+    public static isDummyVertex(vertexId: string): boolean {
+        return vertexId.startsWith(this.prefix);
     }
 }

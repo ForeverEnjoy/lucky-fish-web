@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { FlowchartComponent } from './flowchart/flowchart.component';
+import { FlowchartsComponent } from './flowchart/flowcharts.component';
 
 const routes: Routes = [
-    { path: '', redirectTo: 'flowchart', pathMatch: 'full' },
-    { path: 'flowchart', component: FlowchartComponent },
+    { path: '', redirectTo: 'flowcharts', pathMatch: 'full' },
+    { path: 'flowcharts', component: FlowchartsComponent },
     { path: '**', redirectTo: 'flowchart' }
 ];
 

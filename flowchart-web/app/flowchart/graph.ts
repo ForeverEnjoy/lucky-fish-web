@@ -1,240 +1,134 @@
 import { DummyVertex } from './dummy-vertex';
+import { Edge, Vertex, VertexIdType } from './graph-entity';
 
 export class Graph {
     public edges: Edge[];
-    public vertices: Set<number> = new Set<number>();
+    public vertexIdSet: Set<string> = new Set<string>();
 
     constructor(edges: Edge[]) {
         this.edges = edges
         for (let edge of edges) {
-            this.vertices.add(edge.from)
-            this.vertices.add(edge.to)
+            this.vertexIdSet.add(edge.from)
+            this.vertexIdSet.add(edge.to)
         }
     }
 
-    public getOutEdges(vertex: number): Edge[] {
+    public getOutEdges(vertex: string): Edge[] {
         return this.edges.filter(e => e.from === vertex);
     }
 
-    public getInEdges(vertex: number): Edge[] {
+    public getInEdges(vertex: string): Edge[] {
         return this.edges.filter(e => e.to === vertex);
     }
 
     public addEdge(edge: Edge) {
         this.edges.push(edge);
-        this.vertices.add(edge.from)
-        this.vertices.add(edge.to)
-    }
-
-    // ---------------------------------- remove cycles ----------------------------------
-    private _stack: Set<number> = new Set<number>();
-    private _visited: Set<number> = new Set<number>();
-    public removeCycles() {
-        this._visited.clear();
-        this._stack.clear();
-        this.vertices.forEach(vertex => {
-            this.dfsRemove(vertex);
-        });
-    }
-
-    private dfsRemove(vertex: number) {
-        if (this._visited.has(vertex)) {
-            return
-        }
-        this._visited.add(vertex)
-        this._stack.add(vertex)
-        for (let edge of this.getOutEdges(vertex)) {
-            if (this._stack.has(edge.to)) {
-                edge.reverse();
-            } else {
-                this.dfsRemove(edge.to)
-            }
-        }
-        this._stack.delete(vertex);
-    }
-
-    // 分层 并 插入虚拟结点
-    public levels: number[][] = [];
-    public assignLayers(): number[][] {
-        this.levels = [];
-
-        let inMap = new Map<number, number>();
-        this.vertices.forEach(v => {
-            inMap.set(v, 0);
-        })
-
-        this.edges.forEach(e => {
-            inMap.set(e.to, inMap.get(e.to) + 1)
-        });
-
-        while(true) {
-            let arr = [];
-            inMap.forEach((value, key) => {
-                if (value == 0)  {
-                    arr.push(key);
-                }
-            });
-
-            if (arr.length == 0) {
-                break;
-            }
-
-            this.edges.forEach(e => {
-                if (arr.findIndex(v => e.from === v) >= 0) {
-                    inMap.set(e.to, inMap.get(e.to) - 1);
-                }
-            });
-
-            arr.forEach(v => {
-                inMap.delete(v);
-            })
-            this.levels.push(arr);
-        }
-
-
-        // console.log(JSON.parse(JSON.stringify(sorted)));
-        // insert dummy vertex
-        this.insertDummyVertexes();
-
-        return this.levels;
-    }
-
-    public insertDummyVertexes() {
-        for (let i = 0; i < this.levels.length - 1; ++i) {
-            for (let j = 0; j < this.levels[i].length; ++j) {
-                let u = this.levels[i][j];
-                let outEdges = this.getOutEdges(u);
-                outEdges.forEach(e => {
-                    if (this.levels[i + 1].findIndex(v => e.to == v) < 0) {
-                        let dummyVertex = DummyVertex.Create();
-                        let newEdge = new Edge(dummyVertex, e.to);
-                        e.to = dummyVertex;
-                        this.addEdge(newEdge);
-                        this.levels[i+1].push(dummyVertex);
-                    }
-                });
-            }
-        }
+        this.vertexIdSet.add(edge.from)
+        this.vertexIdSet.add(edge.to)
     }
 }
 
-export class Edge {
-    public from: number;
-    public to: number;
-    public label: string;
-    public type: number;
-    public isReversed: boolean;
+export class VertexOrder {
+    public static orderVertexes(graph: Graph, vertexIdTypeLayers: string[][]): string[][] {
+        let nodeLayers = this.convertToOrderVertexesNode(vertexIdTypeLayers);
 
-    constructor(from: number, to: number) {
-        this.from = from;
-        this.to = to;
-        this.label = null;
-        this.type = -1;
-        this.isReversed = false;
-    }
-
-    public equals(other: Edge): boolean {
-        return this.from === other.from
-            && this.to === other.to
-            && this.label === other.label;
-    }
-
-    public reverse() {
-        let from = this.from; //swap arrow
-        this.from= this.to;
-        this.to = from;
-        this.isReversed = !this.isReversed;
-    }
-}
-
-export class VertexOrderer {
-    private _graph: Graph;
-    private _layers: Node[][] = [];
-    private virtualNow = 1000;
-    constructor(graph: Graph, numLayers: number[][]) {
-        this._graph = graph;
-        this._layers = [];
-        numLayers.forEach(numLayer => {
-            let row = [];
-            numLayer.forEach(num => {
-                let node = new Node();
-                node.id = num;
-                row.push(node);
+        for (let i = 1; i < nodeLayers.length; ++i) {
+            nodeLayers[i].sort((a, b) => {
+                return this.divide(a.inWeight, a.inNodes.length) - this.divide(b.inWeight, b.inNodes.length)
             });
-            this._layers.push(row);
-        })
-    }
-
-    public orderVertexes(): Node[][] {
-        let result = [];
-
-        this._layers.forEach(layer => {
-            layer.forEach(t => {
-                this._graph.getOutEdges(t.id).forEach(e => {
-                    t.out.push(e.to);
-                });
-            })
-        })
-        let nextVirtual = [];
-        for (let i = 0; i < this._layers.length; ++i) {
-            this._layers[i].push(...nextVirtual);
-            this._layers[i].sort((a, b) => a.inWeight/(a.inNodes.length+1)- b.inWeight/(b.inNodes.length+1));
-            if (i == this._layers.length - 1) {
+            let tmpArr = [];
+            nodeLayers[i].forEach(v => {
+                tmpArr.push(v.id);
+            });
+            console.log('layers in @@', i, tmpArr);
+            if (i == nodeLayers.length - 1) {
                 break;
             }
-            nextVirtual = [];
-            for (let j = 0; j < this._layers[i].length; ++j) {
-                let node = this._layers[i][j];
-                for (let k = 0; k < node.out.length; ++k) {
-                    let to = node.out[k];
-                    let nextIndex = this._layers[i + 1].findIndex(nextNode => nextNode.id == to);
-                    let nextNode = this._layers[i+1][nextIndex];
-                    nextNode.inWeight += j;
-                    node.outNodes.push(nextNode);
-                    nextNode.inNodes.push(node);
-                }
+            for (let j = 0; j < nodeLayers[i].length; ++j) {
+                let node = nodeLayers[i][j];
+                graph.getOutEdges(node.id).forEach(edge => {
+                    let toNode = nodeLayers[i + 1].find(nextNode => nextNode.id == edge.to);
+                    toNode.inWeight += j;
+                    node.outNodes.push(toNode);
+                    toNode.inNodes.push(node);
+                });
             }
         }
 
-        for (let i = this._layers.length - 1; i >= 0; --i) {
-            this._layers[i].sort((a, b) => a.outWeight/(a.outNodes.length+1.0) - b.outWeight/(b.outNodes.length+1.0));
+        for (let i = nodeLayers.length - 1; i >= 0; --i) {
+            nodeLayers[i].sort((a, b) => this.divide(a.outWeight, a.outNodes.length) - this.divide(b.outWeight, b.outNodes.length));
+            let tmpArr = [];
+            nodeLayers[i].forEach(v => {
+                tmpArr.push(v.id);
+            });
+            console.log('layers out @@', i, tmpArr);
+
             if (i < 1) {
                 break;
             }
 
-            for (let j = 0; j < this._layers[i].length; ++j) {
-                let node = this._layers[i][j];
+            for (let j = 0; j < nodeLayers[i].length; ++j) {
+                let node = nodeLayers[i][j];
                 for (let k = 0; k < node.inNodes.length; ++k) {
                     node.inNodes[k].outWeight += j;
                 }
             }
         }
-        this.show();
-        return this._layers;
+
+        return this.convertToVertexIdType(nodeLayers);
     }
 
-    public show() {
-        for (let i = 0; i < this._layers.length; ++i) {
-            console.log(this._layers[i]);
+    private static convertToOrderVertexesNode(inLayers: VertexIdType[][]): OrderVertexesNode[][] {
+        let outLayers = [];
+        inLayers.forEach(inLayer => {
             let row = [];
-            for (let j = 0; j < this._layers[i].length; ++j) {
-                let node = this._layers[i][j];
-                row.push(node.id);
-            }
-            // console.log('row  ', i + 1, '   : ', row);
+            inLayer.forEach(vertex => {
+                let node = new OrderVertexesNode();
+                node.id = vertex;
+                row.push(node);
+            });
+            outLayers.push(row);
+        })
+        return outLayers;
+    }
+
+    private static convertToVertexIdType(inLayers: OrderVertexesNode[][]): VertexIdType[][] {
+        let outLayers = [];
+        inLayers.forEach(inLayer => {
+            let row = [];
+            inLayer.forEach(v => {
+                row.push(v.id);
+            });
+            outLayers.push(row);
+        })
+        return outLayers;
+    }
+
+    private static divide(a: number, b: number): number {
+        if (0 == b) {
+            return -1;
         }
+        return a / b;
     }
 }
 
-export class Node {
+export class OrderVertexesNode {
+    public id: string;
+    public out: string[] = [];
+    public inWeight: number = 0;
+    public outWeight: number = 0;
+    public outNodes: OrderVertexesNode[] = [];
+    public inNodes: OrderVertexesNode[] = [];
+}
+
+export class PosNode {
+    public id: string;
     public x: number;
     public y: number;
     public width: number = 50;
     public height: number = 50;
-    public id: number;
-    public out: number[] = [];
-    public inWeight: number = 0;
-    public outWeight: number = 0;
-    public outNodes: Node[] = [];
-    public inNodes: Node[] = [];
+
+    constructor(id: string) {
+        this.id = id;
+    }
 }
