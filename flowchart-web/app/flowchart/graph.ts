@@ -28,24 +28,17 @@ export class Graph {
     }
 }
 
-export class VertexOrderer {
-    public orderVertexes(graph: Graph, vertexIdTypeLayers: string[][]): string[][] {
+export class VertexOrder {
+    public static orderVertexes(graph: Graph, vertexIdTypeLayers: string[][]): string[][] {
         let nodeLayers = this.convertToOrderVertexesNode(vertexIdTypeLayers);
-        // nodeLayers.forEach(layer => {
-        //     layer.forEach(v => {
-        //         graph.getOutEdges(v.id).forEach(e => {
-        //             v.out.push(e.to);
-        //         });
-        //     })
-        // })
 
         for (let i = 1; i < nodeLayers.length; ++i) {
             nodeLayers[i].sort((a, b) => {
-                return a.inWeight/(a.inNodes.length+1)- b.inWeight/(b.inNodes.length+1)
+                return this.divide(a.inWeight, a.inNodes.length) - this.divide(b.inWeight, b.inNodes.length)
             });
             let tmpArr = [];
             nodeLayers[i].forEach(v => {
-                tmpArr.push(v);
+                tmpArr.push(v.id);
             });
             console.log('layers in @@', i, tmpArr);
             if (i == nodeLayers.length - 1) {
@@ -54,26 +47,16 @@ export class VertexOrderer {
             for (let j = 0; j < nodeLayers[i].length; ++j) {
                 let node = nodeLayers[i][j];
                 graph.getOutEdges(node.id).forEach(edge => {
-                    let to = edge.to;
-                    let nextIndex = nodeLayers[i + 1].findIndex(nextNode => nextNode.id == to);
-                    let nextNode = nodeLayers[i+1][nextIndex];
-                    nextNode.inWeight += j;
-                    node.outNodes.push(nextNode);
-                    nextNode.inNodes.push(node);
+                    let toNode = nodeLayers[i + 1].find(nextNode => nextNode.id == edge.to);
+                    toNode.inWeight += j;
+                    node.outNodes.push(toNode);
+                    toNode.inNodes.push(node);
                 });
-                // for (let k = 0; k < node.out.length; ++k) {
-                //     let to = node.out[k];
-                //     let nextIndex = nodeLayers[i + 1].findIndex(nextNode => nextNode.id == to);
-                //     let nextNode = nodeLayers[i+1][nextIndex];
-                //     nextNode.inWeight += j;
-                //     node.outNodes.push(nextNode);
-                //     nextNode.inNodes.push(node);
-                // }
             }
         }
 
         for (let i = nodeLayers.length - 1; i >= 0; --i) {
-            nodeLayers[i].sort((a, b) => a.outWeight/(a.outNodes.length+1.0) - b.outWeight/(b.outNodes.length+1.0));
+            nodeLayers[i].sort((a, b) => this.divide(a.outWeight, a.outNodes.length) - this.divide(b.outWeight, b.outNodes.length));
             let tmpArr = [];
             nodeLayers[i].forEach(v => {
                 tmpArr.push(v.id);
@@ -92,18 +75,10 @@ export class VertexOrderer {
             }
         }
 
-        let result = [];
-        for (let i = 0; i < nodeLayers.length; ++i) {
-            let row = [];
-            for (let j = 0; j < nodeLayers[i].length; ++j) {
-                row.push(nodeLayers[i][j].id);
-            }
-            result.push(row);
-        }
-        return result;
+        return this.convertToVertexIdType(nodeLayers);
     }
 
-    public convertToOrderVertexesNode(inLayers: VertexIdType[][]): OrderVertexesNode[][] {
+    private static convertToOrderVertexesNode(inLayers: VertexIdType[][]): OrderVertexesNode[][] {
         let outLayers = [];
         inLayers.forEach(inLayer => {
             let row = [];
@@ -117,16 +92,23 @@ export class VertexOrderer {
         return outLayers;
     }
 
-    public convertToVertexIdType(inLayers: OrderVertexesNode[][]): VertexIdType[][] {
+    private static convertToVertexIdType(inLayers: OrderVertexesNode[][]): VertexIdType[][] {
         let outLayers = [];
         inLayers.forEach(inLayer => {
             let row = [];
-            inLayer.forEach(v=> {
+            inLayer.forEach(v => {
                 row.push(v.id);
             });
             outLayers.push(row);
         })
         return outLayers;
+    }
+
+    private static divide(a: number, b: number): number {
+        if (0 == b) {
+            return -1;
+        }
+        return a / b;
     }
 }
 

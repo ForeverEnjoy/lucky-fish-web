@@ -1,6 +1,6 @@
 import { Edge, VertexIdType, VertexType } from 'app/flowchart/graph-entity';
 import { DummyVertex } from 'app/flowchart/dummy-vertex';
-import { Graph, PosNode, VertexOrderer } from 'app/flowchart/graph';
+import { Graph, PosNode, VertexOrder } from 'app/flowchart/graph';
 
 export class FlowChartManager {
     private readonly deltX = 50;
@@ -22,15 +22,14 @@ export class FlowChartManager {
     public precede: Map<VertexIdType, VertexIdType> = new Map<VertexIdType, VertexIdType>();
 
     private layers = [];
-    public solve() {
+    public layout() {
         this.removeCycles();
         this.layers = this.assignLayers();
 
         // insert dummy vertex
         this.insertDummyVertexes();
 
-        let order = new VertexOrderer();
-        this.layers = order.orderVertexes(this.graph, this.layers);
+        this.layers = VertexOrder.orderVertexes(this.graph, this.layers);
 
         for (let i = 0; i < this.layers.length; ++i) {
             for (let j = 0; j < this.layers[i].length; ++j) {

@@ -1,25 +1,25 @@
 import { Edge } from './graph-entity';
 
-// var DataEdges = [
-//     new Edge(1, 3),
-//     new Edge(1, 4),
-//     new Edge(4, 2),
-//     new Edge(2, 3),
-//     new Edge(2, 5),
-//     new Edge(5, 6),
-// ];
+let DataEdges4 = [
+    new Edge('1', '3'),
+    new Edge('1', '4'),
+    new Edge('4', '2'),
+    new Edge('2', '3'),
+    new Edge('2', '5'),
+    new Edge('5', '6'),
+];
 
-var DataEdges3 = [
-    new Edge("1", '2'),
-    new Edge("1", '3'),
-    new Edge("3", '4'),
-    new Edge("4", '5'),
-    new Edge("4", '6'),
-    new Edge("5", '2'),
-    new Edge("5", '7'),
-    new Edge("5", '8'),
-    new Edge("6", '3'),
-    new Edge("8", '4'),
+let DataEdges3 = [
+    new Edge('1', '2'),
+    new Edge('1', '3'),
+    new Edge('3', '4'),
+    new Edge('4', '5'),
+    new Edge('4', '6'),
+    new Edge('5', '2'),
+    new Edge('5', '7'),
+    new Edge('5', '8'),
+    new Edge('6', '3'),
+    new Edge('8', '4'),
 ];
 
 
@@ -41,7 +41,7 @@ let DataEdges1 = [
     new Edge('8', '10'),
 ];
 
-var DataEdges2 = [
+let DataEdges2 = [
     new Edge('1', '2'),
     new Edge('2', '3'),
     new Edge('2', '7'),
@@ -55,9 +55,10 @@ var DataEdges2 = [
 ];
 
 let GraphData = [
+    DataEdges1,
     DataEdges3,
     DataEdges2,
-    DataEdges1
+    DataEdges4,
 ]
 
 export { GraphData };

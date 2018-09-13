@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 
-import { Graph, PosNode, VertexOrderer } from './graph';
+import { Graph, PosNode, VertexOrder } from './graph';
 import { DummyVertex } from './dummy-vertex';
 import { FlowChartManager } from 'app/flowchart/flowchart-manager';
 import { VertexIdType } from 'app/flowchart/graph-entity';
@@ -138,7 +138,8 @@ export class FlowchartComponent implements OnInit {
     public SegmentType = SegmentType;
 
     // config
-    public isShowDummyNode = true;
+    @Input()
+    public isShowDummyNode = false;
 
     //
     public flowchartManager: FlowChartManager;
@@ -150,9 +151,8 @@ export class FlowchartComponent implements OnInit {
     public graph: Graph = new Graph([]);
 
     public ngOnInit() {
-       // let g = new Graph(GraphData[1]);
        this.flowchartManager = new FlowChartManager(this.graph);
-       this.flowchartManager.solve();
+       this.flowchartManager.layout();
 
        this.segments = [];
        this.graph.edges.forEach(e => {
@@ -194,11 +194,11 @@ export class FlowchartComponent implements OnInit {
 
     public segmentCrossPolygon(a: Point, b: Point, polygon: Point[]): Point {
         if (null === polygon || polygon.length < 2) {
-            return null;
+            return Point.zero();
         }
 
         for (let i = 0; i < polygon.length; ++i) {
-            let p = this.segmentsIntr(a, b, polygon[i], polygon[(i + 1)%polygon.length]);
+            let p = this.segmentsIntersection(a, b, polygon[i], polygon[(i + 1)%polygon.length]);
             if (null !== p) {
                 return p;
             }
@@ -206,7 +206,7 @@ export class FlowchartComponent implements OnInit {
         return Point.zero();
     }
 
-    public segmentsIntr(a: Point, b: Point, c: Point, d: Point): Point {
+    public segmentsIntersection(a: Point, b: Point, c: Point, d: Point): Point {
 
         /** 1 解线性方程组, 求线段交点. **/
             // 如果分母为0 则平行或共线, 不相交

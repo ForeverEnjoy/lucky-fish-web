@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { Graph, PosNode, VertexOrderer } from './graph';
+import { Graph, PosNode, VertexOrder } from './graph';
 import { DummyVertex } from './dummy-vertex';
 import { FlowChartManager } from 'app/flowchart/flowchart-manager';
 import { VertexIdType } from 'app/flowchart/graph-entity';
@@ -22,6 +22,14 @@ import { GraphData } from 'app/flowchart/data';
                     <div class="font-type-2"> 
                         傻鱼娜的流程图
                     </div>
+                    <div class="w-20-px">
+                    </div>
+                    <div class="hover-pointer
+                                btn"
+                         [style.width.px]="152"
+                         (click)="isShowDummyNode = !isShowDummyNode">
+                        {{isShowDummyNode ? 'Hide Dummy Node' : 'Show Dummy Node'}}
+                    </div>
                 </div>
             </div>
             
@@ -29,7 +37,8 @@ import { GraphData } from 'app/flowchart/data';
                         h-center-aligner
                         percent-100-w">
                 <ng-container *ngFor="let g of graphs">
-                    <flowchart [graph]="g">
+                    <flowchart [graph]="g"
+                               [isShowDummyNode]="isShowDummyNode">
                     </flowchart>
                     <hr class="percent-100-w green-bg">
                 </ng-container>
@@ -38,11 +47,13 @@ import { GraphData } from 'app/flowchart/data';
     `,
     styleUrls: [
         'app/flowchart/flowchart.sizer.css',
-        'app/flowchart/flowchart.css',
+        'app/flowchart/flowcharts.css',
     ]
 })
 
 export class FlowchartsComponent implements OnInit {
+    public isShowDummyNode = false;
+
     public graphs = [];
     public ngOnInit() {
         this.graphs = GraphData.map(e => new Graph(e));
